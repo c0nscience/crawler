@@ -10,17 +10,17 @@ import (
 	"testing"
 )
 
-func TestCrawlerClient_InStock(t *testing.T) {
+func TestCrawlerClient_InStock_NewPage(t *testing.T) {
 
 	tests := []struct {
 		size    string
 		inStock bool
 	}{
 		{"S 36/38", true},
-		{"M 40/42", false},
+		{"M 40/42", true},
 		{"L 44/46", true},
-		{"XL 48/50", false},
-		{"XXL 52/54", false},
+		{"XL 48/50", true},
+		{"XXL 52/54", true},
 	}
 
 	for _, test := range tests {
@@ -32,7 +32,7 @@ func TestCrawlerClient_InStock(t *testing.T) {
 		}
 		t.Run(fmt.Sprintf("%s should %s in stock", test.size, v), func(t *testing.T) {
 			svr := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				b, err := os.ReadFile("test.txt")
+				b, err := os.ReadFile("new-page.txt")
 				if err != nil {
 					w.WriteHeader(http.StatusInternalServerError)
 					return

@@ -31,7 +31,7 @@ func (me *crawlerClient) InStock(size string) bool {
 		return false
 	}
 
-	r := regexp.MustCompile(`(?m)<li.*?data-availability="available".*?>\n<a href="#">(` + size + `)</a>\n</li>`)
+	r := regexp.MustCompile(`<li.*?data-availability="available".*?> (` + size + `)</.*?</li>`)
 
 	b := r.FindStringSubmatch(string(out))
 	return b != nil

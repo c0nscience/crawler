@@ -5,12 +5,22 @@ import (
 	"crawler/pkg/crawler"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339})
+}
+
 func main() {
+	termChan := make(chan os.Signal)
+	signal.Notify(termChan, syscall.SIGTERM, syscall.SIGINT)
+
 	crawlerUrl := os.Getenv("CRAWLER_URL")
 	size := os.Getenv("SIZE")
 	tgChannel := os.Getenv("TELEGRAM_CHANNEL")
@@ -41,4 +51,8 @@ func main() {
 			}
 		}()
 	}
+
+	<-termChan
+
+	log.Info().Msg("Shutdown crawler")
 }

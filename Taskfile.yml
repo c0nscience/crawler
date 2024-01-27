@@ -1,0 +1,7 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  docker:push:
+    cmd: docker buildx build --platform linux/arm64 -t bherzig/crawler:{{.VERSION}} --push .
