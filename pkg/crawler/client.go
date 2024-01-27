@@ -1,10 +1,10 @@
 package crawler
 
 import (
+	"github.com/PuerkitoBio/goquery"
 	"github.com/rs/zerolog/log"
-	"io"
 	"net/http"
-	"regexp"
+	"strings"
 )
 
 type crawlerClient struct {
@@ -25,14 +25,19 @@ func (me *crawlerClient) InStock(size string) bool {
 	}
 	defer resp.Body.Close()
 
-	out, err := io.ReadAll(resp.Body)
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		log.Error().Err(err)
 		return false
 	}
 
-	r := regexp.MustCompile(`<li.*?data-availability="available".*?> (` + size + `)</.*?</li>`)
-
-	b := r.FindStringSubmatch(string(out))
-	return b != nil
+	el := doc.Find("li[data-availability]").
+		FilterFunction(func(_ int, sel *goquery.Selection) bool {
+			val, _ := sel.Attr("data-availability")
+			return val == "available" || val == "back-in-stock"
+		}).
+		FilterFunction(func(i int, selection *goquery.Selection) bool {
+			return strings.TrimSpace(selection.Text()) == size
+		})
+	return len(el.Nodes) > 0
 }
